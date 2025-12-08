@@ -4,6 +4,7 @@ import 'package:logic_health/features/auth/widgets/custom_button_widget.dart';
 import 'package:logic_health/features/auth/widgets/divider_widget.dart';
 import 'package:logic_health/features/auth/widgets/google_button_widget.dart';
 import 'package:logic_health/features/auth/widgets/textfield_widget.dart';
+import 'package:logic_health/features/dashboard/views/home_bot_view.dart';
 import 'package:provider/provider.dart';
 
 // Provider
@@ -240,6 +241,10 @@ class _LoginViewState extends State<LoginView> {
                                     final success = await authProvider
                                         .signInWithGoogle();
                                     if (success) _clearFields();
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      HomeBotView.id,
+                                    );
                                   });
                                 },
                         ),

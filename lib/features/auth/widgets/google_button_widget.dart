@@ -10,8 +10,11 @@ class GoogleButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPressed,
-      child: Opacity(
-        opacity: onPressed == null ? 0.6 : 1.0,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
