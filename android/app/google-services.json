@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "638647218338",
+    "project_id": "logic-health-df148",
+    "storage_bucket": "logic-health-df148.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:638647218338:android:e200fc8b02247202c727fb",
+        "android_client_info": {
+          "package_name": "com.example.logic_health"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "638647218338-d7tlqnka1hr0g6dl8mn3j7hjmim5pk14.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.logic_health",
+            "certificate_hash": "86f7d411aa42b2b556c37dc8c38b3cbb85a41c7c"
+          }
+        },
+        {
+          "client_id": "638647218338-cs6qvp71iuk9p0hlhip1ig2kmpsnr947.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2oQO-pPQcZe41B5dxGix7rphwXAvrSaA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "638647218338-cs6qvp71iuk9p0hlhip1ig2kmpsnr947.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
