@@ -1,5 +1,4 @@
-// lib/features/auth/provider/auth_provider.dart
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -109,6 +108,37 @@ class AuthProvider with ChangeNotifier {
       _setLoading(false);
     }
     return false;
+  }
+
+  // ---------------- UPDATE FULL NAME ONLY ----------------
+  Future<void> updateUserProfile({required String fullName}) async {
+    if (_user == null) throw Exception('No user logged in');
+
+    _setLoading(true);
+
+    try {
+      final uid = FirebaseAuth.instance.currentUser!.uid;
+
+      // Update Firestore
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'full_name': fullName.trim(),
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+
+      // Update local cached user instantly
+      _user = _user!.copyWith(fullName: fullName.trim());
+
+      notifyListeners(); // UI updates everywhere immediately
+    } on FirebaseException catch (e) {
+      _errorMessage = 'Failed to update name. Try again.';
+      debugPrint('Profile update error: ${e.code}');
+      rethrow;
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred.';
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   // ---------------- LOGOUT ----------------

@@ -1,13 +1,16 @@
+// lib/features/auth/models/auth_model.dart
+
 class UserModel {
   final String id;
   final String fullName;
   final String email;
+  final String? photoUrl; // optional, kept for future use
 
   UserModel({
     required this.id,
     required this.fullName,
     required this.email,
-    String? photoUrl,
+    this.photoUrl,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
@@ -15,11 +18,22 @@ class UserModel {
       id: id,
       fullName: map['full_name'] as String? ?? 'Unknown User',
       email: map['email'] as String? ?? '',
+      photoUrl: map['photo_url'] as String?,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {'full_name': fullName, 'email': email};
+    return {'full_name': fullName, 'email': email, 'photo_url': photoUrl};
+  }
+
+  // Critical: add this method
+  UserModel copyWith({String? fullName, String? email, String? photoUrl}) {
+    return UserModel(
+      id: id,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      photoUrl: photoUrl ?? this.photoUrl,
+    );
   }
 
   @override

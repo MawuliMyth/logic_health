@@ -5,6 +5,7 @@ class TextfieldWidget extends StatefulWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final TextEditingController controller;
+  final bool enabled; // ← ADD THIS
 
   const TextfieldWidget({
     super.key,
@@ -12,6 +13,7 @@ class TextfieldWidget extends StatefulWidget {
     required this.obscureText,
     required this.keyboardType,
     required this.controller,
+    required this.enabled, // ← ADD THIS
   });
 
   @override
@@ -30,6 +32,7 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      enabled: widget.enabled, // ← APPLY IT HERE
       controller: widget.controller,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
@@ -53,11 +56,11 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
                   _obscureText ? Icons.visibility_off : Icons.visibility,
                   color: Colors.grey,
                 ),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
+                onPressed: widget.enabled
+                    ? () {
+                        setState(() => _obscureText = !_obscureText);
+                      }
+                    : null,
               )
             : null,
       ),

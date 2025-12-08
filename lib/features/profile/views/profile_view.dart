@@ -139,41 +139,67 @@ class ProfileView extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
-                            title: Text('Logout', style: GoogleFonts.poppins()),
+                            title: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Color(0xffFF0000),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Logout',
+                                  style: GoogleFonts.poppins(
+                                    color: Color(0xffFF0000),
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
                             content: const Text(
                               'Are you sure you want to logout?',
                             ),
                             actions: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  side: BorderSide(
-                                    color: Color(0xffFF0000),
-                                    width: 1.0,
-                                  ),
-                                ),
-                                onPressed: () => Navigator.pop(ctx),
-                                child: const Text(
-                                  'Cancel',
-                                  style: TextStyle(color: Color(0xffFF0000)),
-                                ),
-                              ),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xffFF0000),
-                                ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        side: BorderSide(
+                                          color: Color(0xffFF0000),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: const Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                          color: Color(0xffFF0000),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Color(0xffFF0000),
+                                      ),
 
-                                onPressed: () {
-                                  Navigator.pop(ctx);
-                                  auth.logout();
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
-                                    LoginView.id,
-                                    (route) => false,
-                                  );
-                                },
-                                child: const Text(
-                                  'Logout',
-                                  style: TextStyle(color: Colors.white),
+                                      onPressed: () {
+                                        Navigator.pop(ctx);
+                                        auth.logout();
+                                        Navigator.pushNamedAndRemoveUntil(
+                                          context,
+                                          LoginView.id,
+                                          (route) => false,
+                                        );
+                                      },
+                                      child: const Text(
+                                        'Logout',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

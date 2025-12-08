@@ -259,7 +259,7 @@ class _LoginViewState extends State<LoginView> {
                 Container(
                   color: Colors.black54,
                   child: const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
+                    child: CircularProgressIndicator(color: Color(0xffFF0000)),
                   ),
                 ),
             ],
@@ -274,6 +274,7 @@ class _LoginViewState extends State<LoginView> {
       key: const ValueKey('signin'),
       children: [
         TextfieldWidget(
+          enabled: true,
           hintText: 'Email',
           obscureText: false,
           keyboardType: TextInputType.emailAddress,
@@ -281,6 +282,7 @@ class _LoginViewState extends State<LoginView> {
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
+          enabled: true,
           hintText: 'Password',
           obscureText: true,
           keyboardType: TextInputType.visiblePassword,
@@ -311,6 +313,7 @@ class _LoginViewState extends State<LoginView> {
       key: const ValueKey('register'),
       children: [
         TextfieldWidget(
+          enabled: true,
           hintText: 'Full Name',
           obscureText: false,
           keyboardType: TextInputType.name,
@@ -318,6 +321,7 @@ class _LoginViewState extends State<LoginView> {
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
+          enabled: true,
           hintText: 'Email',
           obscureText: false,
           keyboardType: TextInputType.emailAddress,
@@ -325,6 +329,7 @@ class _LoginViewState extends State<LoginView> {
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
+          enabled: true,
           hintText: 'Password',
           obscureText: true,
           keyboardType: TextInputType.visiblePassword,
