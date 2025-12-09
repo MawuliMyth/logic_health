@@ -53,7 +53,7 @@ class ContainerImageWidget extends StatelessWidget {
                     "About Us",
                     style: GoogleFonts.poppins(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 24,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
