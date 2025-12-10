@@ -136,7 +136,7 @@ class TeamCarouselWidget extends StatelessWidget {
                                     color: Colors.white,
                                     // Use the calculated responsive font size
                                     fontSize: roleFontSize,
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],

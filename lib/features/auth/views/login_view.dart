@@ -349,6 +349,10 @@ class _LoginViewState extends State<LoginView> {
                       passwordController.text,
                     );
                     if (success) _clearFields();
+                    Navigator.pushReplacementNamed(
+                      context,
+                      HomeBotView.id,
+                    );
                   });
                 },
         ),
