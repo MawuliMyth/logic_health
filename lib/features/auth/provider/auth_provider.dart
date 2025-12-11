@@ -34,45 +34,35 @@ class AuthProvider with ChangeNotifier {
     });
   }
 
-  // ---------------- REGISTER ----------------
-  Future<bool> register(String fullName, String email, String password) async {
+  // 💡 NEW: Helper to run auth logic and handle loading/error states consistently
+  Future<bool> _runAuthAction(Future<User?> Function() action) async {
     _setLoading(true);
     try {
-      final firebaseUser = await _authController.register(
-        fullName,
-        email,
-        password,
-      );
-
-      if (firebaseUser != null) {
-        return true;
-      }
-      return false;
+      final firebaseUser = await action();
+      return firebaseUser != null;
     } on FirebaseAuthException catch (e) {
       _errorMessage = _handleFirebaseError(e.code);
     } catch (e) {
-      _errorMessage = 'Registration failed. Please try again.';
+      _errorMessage = 'An unexpected error occurred. Please try again.';
+      debugPrint('Auth action error: $e');
     } finally {
       _setLoading(false);
     }
     return false;
   }
 
+  // ---------------- REGISTER ----------------
+  Future<bool> register(String fullName, String email, String password) async {
+    // 💡 Refactored to use the helper method
+    return _runAuthAction(
+      () => _authController.register(fullName, email, password),
+    );
+  }
+
   // ---------------- LOGIN ----------------
   Future<bool> login(String email, String password) async {
-    _setLoading(true);
-    try {
-      final firebaseUser = await _authController.login(email, password);
-      if (firebaseUser != null) return true;
-      return false;
-    } on FirebaseAuthException catch (e) {
-      _errorMessage = _handleFirebaseError(e.code);
-    } catch (e) {
-      _errorMessage = 'Login failed. Please try again.';
-    } finally {
-      _setLoading(false);
-    }
-    return false;
+    // 💡 Refactored to use the helper method
+    return _runAuthAction(() => _authController.login(email, password));
   }
 
   // ---------------- GOOGLE SIGN-IN ----------------
@@ -128,7 +118,7 @@ class AuthProvider with ChangeNotifier {
       // Update local cached user instantly
       _user = _user!.copyWith(fullName: fullName.trim());
 
-      notifyListeners(); // UI updates everywhere immediately
+      notifyListeners();
     } on FirebaseException catch (e) {
       _errorMessage = 'Failed to update name. Try again.';
       debugPrint('Profile update error: ${e.code}');

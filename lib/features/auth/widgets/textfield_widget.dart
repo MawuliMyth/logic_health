@@ -5,7 +5,9 @@ class TextfieldWidget extends StatefulWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final TextEditingController controller;
-  final bool enabled; // ← ADD THIS
+  final bool enabled;
+  // 💡 NEW: Validator function for FormField
+  final String? Function(String?)? validator;
 
   const TextfieldWidget({
     super.key,
@@ -13,7 +15,8 @@ class TextfieldWidget extends StatefulWidget {
     required this.obscureText,
     required this.keyboardType,
     required this.controller,
-    required this.enabled, // ← ADD THIS
+    required this.enabled,
+    this.validator, // 💡 NEW: Added to constructor
   });
 
   @override
@@ -31,14 +34,28 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      enabled: widget.enabled, // ← APPLY IT HERE
+    // 💡 Changed from TextField to TextFormField
+    return TextFormField(
+      enabled: widget.enabled,
       controller: widget.controller,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
+      validator: widget.validator, // 💡 Applied validator
+
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
+
+        // 💡 ADDED: Specific styling for validation errors
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
+
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

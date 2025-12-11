@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:logic_health/features/auth/widgets/custom_button_widget.dart';
 import 'package:logic_health/features/auth/widgets/divider_widget.dart';
 import 'package:logic_health/features/auth/widgets/google_button_widget.dart';
-import 'package:logic_health/features/auth/widgets/textfield_widget.dart';
 import 'package:logic_health/features/dashboard/views/home_bot_view.dart';
 import 'package:provider/provider.dart';
 
 // Provider
 import '../provider/auth_provider.dart';
+import '../widgets/textfield_widget.dart';
 
 class LoginView extends StatefulWidget {
   static const String id = '/login';
@@ -21,6 +21,9 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   bool isSignInActive = true;
+
+  // 💡 NEW: Global key for form validation
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late final TextEditingController nameController;
   late final TextEditingController emailController;
@@ -52,14 +55,7 @@ class _LoginViewState extends State<LoginView> {
     try {
       await callback();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('An error occurred. Please try again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      debugPrint('Unexpected error in _handleAsync: $e');
     }
   }
 
@@ -126,8 +122,13 @@ class _LoginViewState extends State<LoginView> {
                             children: [
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () =>
-                                      setState(() => isSignInActive = false),
+                                  onTap: () => setState(() {
+                                    isSignInActive = false;
+                                    authProvider
+                                        .clearError(); // Clear error on switch
+                                    _formKey.currentState
+                                        ?.reset(); // Clear validation errors
+                                  }),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: isSignInActive
@@ -151,8 +152,13 @@ class _LoginViewState extends State<LoginView> {
                               ),
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () =>
-                                      setState(() => isSignInActive = true),
+                                  onTap: () => setState(() {
+                                    isSignInActive = true;
+                                    authProvider
+                                        .clearError(); // Clear error on switch
+                                    _formKey.currentState
+                                        ?.reset(); // Clear validation errors
+                                  }),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: isSignInActive
@@ -200,30 +206,34 @@ class _LoginViewState extends State<LoginView> {
                             ),
                           ),
 
-                        // Form switcher
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 400),
-                          switchInCurve: Curves.easeOutCubic,
-                          switchOutCurve: Curves.easeInCubic,
-                          transitionBuilder: (child, animation) {
-                            final offset = !isSignInActive
-                                ? const Offset(1.0, 0)
-                                : const Offset(-1.0, 0);
-                            return SlideTransition(
-                              position: Tween<Offset>(
-                                begin: offset,
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: isSignInActive
-                              ? _buildSignInForm(authProvider)
-                              : _buildRegisterForm(authProvider),
+                        // 💡 NEW: Wrap the form switcher in the Global Form widget
+                        Form(
+                          key: _formKey,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            switchInCurve: Curves.easeOutCubic,
+                            switchOutCurve: Curves.easeInCubic,
+                            transitionBuilder: (child, animation) {
+                              final offset = !isSignInActive
+                                  ? const Offset(1.0, 0)
+                                  : const Offset(-1.0, 0);
+                              return SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: offset,
+                                  end: Offset.zero,
+                                ).animate(animation),
+                                child: FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: isSignInActive
+                                ? _buildSignInForm(authProvider)
+                                : _buildRegisterForm(authProvider),
+                          ),
                         ),
+
                         const SizedBox(height: 20),
                         const DividerWidget(),
                         const SizedBox(height: 20),
@@ -240,11 +250,13 @@ class _LoginViewState extends State<LoginView> {
                                     authProvider.clearError();
                                     final success = await authProvider
                                         .signInWithGoogle();
-                                    if (success) _clearFields();
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      HomeBotView.id,
-                                    );
+                                    if (success && mounted) {
+                                      _clearFields();
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        HomeBotView.id,
+                                      );
+                                    }
                                   });
                                 },
                         ),
@@ -279,6 +291,16 @@ class _LoginViewState extends State<LoginView> {
           obscureText: false,
           keyboardType: TextInputType.emailAddress,
           controller: emailController,
+          // 💡 NEW: Email validation
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Email is required.';
+            }
+            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+              return 'Enter a valid email address.';
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
@@ -287,6 +309,16 @@ class _LoginViewState extends State<LoginView> {
           obscureText: true,
           keyboardType: TextInputType.visiblePassword,
           controller: passwordController,
+          // 💡 NEW: Password validation
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Password is required.';
+            }
+            if (value.length < 6) {
+              return 'Password must be at least 6 characters.';
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 32),
         CustomButtonWidget(
@@ -294,15 +326,21 @@ class _LoginViewState extends State<LoginView> {
           onPressed: auth.isLoading
               ? null
               : () {
-                  _handleAsync(() async {
-                    auth.clearError();
-                    final success = await auth.login(
-                      emailController.text.trim(),
-                      passwordController.text,
-                    );
-                    if (success) _clearFields();
-                    Navigator.pushReplacementNamed(context, HomeBotView.id);
-                  });
+                  // 💡 CRITICAL: Validate form before proceeding
+                  if (_formKey.currentState!.validate()) {
+                    _handleAsync(() async {
+                      auth.clearError();
+                      final success = await auth.login(
+                        emailController.text.trim(),
+                        passwordController.text,
+                      );
+                      // 💡 CRITICAL: Only navigate on successful login
+                      if (success && mounted) {
+                        _clearFields();
+                        Navigator.pushReplacementNamed(context, HomeBotView.id);
+                      }
+                    });
+                  }
                 },
         ),
       ],
@@ -319,6 +357,13 @@ class _LoginViewState extends State<LoginView> {
           obscureText: false,
           keyboardType: TextInputType.name,
           controller: nameController,
+          // 💡 NEW: Name validation
+          validator: (value) {
+            if (value == null || value.isEmpty || value.trim().length < 2) {
+              return 'Full name is required.';
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
@@ -327,6 +372,16 @@ class _LoginViewState extends State<LoginView> {
           obscureText: false,
           keyboardType: TextInputType.emailAddress,
           controller: emailController,
+          // 💡 NEW: Email validation
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Email is required.';
+            }
+            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+              return 'Enter a valid email address.';
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
@@ -335,6 +390,16 @@ class _LoginViewState extends State<LoginView> {
           obscureText: true,
           keyboardType: TextInputType.visiblePassword,
           controller: passwordController,
+          // 💡 NEW: Password validation
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Password is required.';
+            }
+            if (value.length < 6) {
+              return 'Password must be at least 6 characters.';
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 32),
         CustomButtonWidget(
@@ -342,16 +407,22 @@ class _LoginViewState extends State<LoginView> {
           onPressed: auth.isLoading
               ? null
               : () {
-                  _handleAsync(() async {
-                    auth.clearError();
-                    final success = await auth.register(
-                      nameController.text.trim(),
-                      emailController.text.trim(),
-                      passwordController.text,
-                    );
-                    if (success) _clearFields();
-                    Navigator.pushReplacementNamed(context, HomeBotView.id);
-                  });
+                  // 💡 CRITICAL: Validate form before proceeding
+                  if (_formKey.currentState!.validate()) {
+                    _handleAsync(() async {
+                      auth.clearError();
+                      final success = await auth.register(
+                        nameController.text.trim(),
+                        emailController.text.trim(),
+                        passwordController.text,
+                      );
+                      // 💡 CRITICAL: Only navigate on successful registration
+                      if (success && mounted) {
+                        _clearFields();
+                        Navigator.pushReplacementNamed(context, HomeBotView.id);
+                      }
+                    });
+                  }
                 },
         ),
       ],
