@@ -334,7 +334,6 @@ class _LoginViewState extends State<LoginView> {
                         emailController.text.trim(),
                         passwordController.text,
                       );
-                      // 💡 CRITICAL: Only navigate on successful login
                       if (success && mounted) {
                         _clearFields();
                         Navigator.pushReplacementNamed(context, HomeBotView.id);
