@@ -326,7 +326,6 @@ class _LoginViewState extends State<LoginView> {
           onPressed: auth.isLoading
               ? null
               : () {
-                  // 💡 CRITICAL: Validate form before proceeding
                   if (_formKey.currentState!.validate()) {
                     _handleAsync(() async {
                       auth.clearError();
