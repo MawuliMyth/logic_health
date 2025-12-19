@@ -22,7 +22,6 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   bool isSignInActive = true;
 
-  // 💡 NEW: Global key for form validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late final TextEditingController nameController;
@@ -124,10 +123,8 @@ class _LoginViewState extends State<LoginView> {
                                 child: GestureDetector(
                                   onTap: () => setState(() {
                                     isSignInActive = false;
-                                    authProvider
-                                        .clearError(); // Clear error on switch
-                                    _formKey.currentState
-                                        ?.reset(); // Clear validation errors
+                                    authProvider.clearError();
+                                    _formKey.currentState?.reset();
                                   }),
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -206,7 +203,6 @@ class _LoginViewState extends State<LoginView> {
                             ),
                           ),
 
-                        // 💡 NEW: Wrap the form switcher in the Global Form widget
                         Form(
                           key: _formKey,
                           child: AnimatedSwitcher(
@@ -291,7 +287,6 @@ class _LoginViewState extends State<LoginView> {
           obscureText: false,
           keyboardType: TextInputType.emailAddress,
           controller: emailController,
-          // 💡 NEW: Email validation
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Email is required.';
@@ -355,7 +350,6 @@ class _LoginViewState extends State<LoginView> {
           obscureText: false,
           keyboardType: TextInputType.name,
           controller: nameController,
-          // 💡 NEW: Name validation
           validator: (value) {
             if (value == null || value.isEmpty || value.trim().length < 2) {
               return 'Full name is required.';
@@ -370,7 +364,6 @@ class _LoginViewState extends State<LoginView> {
           obscureText: false,
           keyboardType: TextInputType.emailAddress,
           controller: emailController,
-          // 💡 NEW: Email validation
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Email is required.';
@@ -388,7 +381,6 @@ class _LoginViewState extends State<LoginView> {
           obscureText: true,
           keyboardType: TextInputType.visiblePassword,
           controller: passwordController,
-          // 💡 NEW: Password validation
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Password is required.';
@@ -405,7 +397,6 @@ class _LoginViewState extends State<LoginView> {
           onPressed: auth.isLoading
               ? null
               : () {
-                  // 💡 CRITICAL: Validate form before proceeding
                   if (_formKey.currentState!.validate()) {
                     _handleAsync(() async {
                       auth.clearError();
@@ -414,7 +405,6 @@ class _LoginViewState extends State<LoginView> {
                         emailController.text.trim(),
                         passwordController.text,
                       );
-                      // 💡 CRITICAL: Only navigate on successful registration
                       if (success && mounted) {
                         _clearFields();
                         Navigator.pushReplacementNamed(context, HomeBotView.id);

@@ -22,6 +22,9 @@ dependencies:
   smooth_page_indicator: ^1.2.1
   http: ^1.6.0
   modal_bottom_sheet: ^3.0.0
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  intl: ^0.20.2
 
 
 dev_dependencies:

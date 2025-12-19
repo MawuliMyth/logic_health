@@ -1,4 +1,3 @@
-// lib/widgets/event_carousel_slider.dart
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -27,7 +26,7 @@ class _EventCarouselSliderState extends State<EventCarouselSlider> {
     final size = MediaQuery.of(context).size;
 
     return Container(
-      height: size.height * 0.24, // EXACT same height as TipsCarouselCard
+      height: size.height * 0.24,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),

@@ -1,10 +1,8 @@
-// lib/features/auth/models/auth_model.dart
-
 class UserModel {
   final String id;
   final String fullName;
   final String email;
-  final String? photoUrl; // optional, kept for future use
+  final String? photoUrl;
 
   UserModel({
     required this.id,
@@ -26,7 +24,6 @@ class UserModel {
     return {'full_name': fullName, 'email': email, 'photo_url': photoUrl};
   }
 
-  // Critical: add this method
   UserModel copyWith({String? fullName, String? email, String? photoUrl}) {
     return UserModel(
       id: id,

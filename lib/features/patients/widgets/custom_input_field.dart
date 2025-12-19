@@ -10,7 +10,7 @@ class CustomInputField extends StatefulWidget {
   final String? value;
   final Function(String?)? onChanged;
   final TextInputType keyboardType;
-  final String? Function(String?)? validator; // Added validator
+  final String? Function(String?)? validator;
 
   const CustomInputField({
     super.key,
@@ -21,7 +21,7 @@ class CustomInputField extends StatefulWidget {
     this.value,
     this.onChanged,
     this.keyboardType = TextInputType.text,
-    this.validator, // Added to constructor
+    this.validator,
   });
 
   @override
@@ -126,17 +126,14 @@ class _CustomInputFieldState extends State<CustomInputField> {
     return TextFormField(
       controller: widget.controller,
       keyboardType: widget.keyboardType,
-      validator: widget.validator, // Pass validator here
-      autovalidateMode:
-          AutovalidateMode.onUserInteraction, // Shows error as user types
+      validator: widget.validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       style: GoogleFonts.poppins(fontSize: 13),
       decoration: _inputDecoration(),
     );
   }
 
   Widget _buildDropdownTrigger() {
-    // Check if validation error is needed for dropdown
-
     return GestureDetector(
       key: _fieldKey,
       onTap: _showDropdown,
@@ -179,10 +176,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
         fontSize: 12,
         color: const Color(0xff818181),
       ),
-      errorStyle: const TextStyle(
-        fontSize: 10,
-        height: 0.8,
-      ), // Styling the error text
+      errorStyle: const TextStyle(fontSize: 10, height: 0.8),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),

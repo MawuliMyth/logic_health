@@ -25,7 +25,6 @@ class HeartPredictionModel {
     required this.stSlope,
   });
 
-  // This factory handles the "Translation" from UI strings to API values
   factory HeartPredictionModel.fromForm({
     required String age,
     required String sex,

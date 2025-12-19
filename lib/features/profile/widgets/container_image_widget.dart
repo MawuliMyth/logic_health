@@ -8,10 +8,9 @@ class ContainerImageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 300, // adjust as you want
+      height: 300,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        // 1. Remove the gradient from here. The image will now be the base layer.
         image: const DecorationImage(
           image: AssetImage("assets/images/hand.jpg"),
           fit: BoxFit.cover,
@@ -19,7 +18,6 @@ class ContainerImageWidget extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // 2. Add the gradient as a separate Container layer inside the Stack.
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -30,18 +28,13 @@ class ContainerImageWidget extends StatelessWidget {
                   Color(
                     0xff666666,
                   ), // Use Colors.transparent for better clarity
-                  const Color(
-                    0xff000000,
-                  ).withOpacity(0.0), // Start fully transparent
-                  const Color(
-                    0xff000000,
-                  ).withOpacity(0.8), // End semi-transparent black
+                  const Color(0xff000000),
+                  const Color(0xff000000),
                 ],
               ),
             ),
           ),
 
-          // 3. Keep the content (Text widgets) aligned to the bottom.
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(

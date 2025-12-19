@@ -16,7 +16,6 @@ class ProfileView extends StatelessWidget {
 
   const ProfileView({super.key});
 
-  // Navigation handler
   void _navigateTo(BuildContext context, String route) {
     Navigator.pushNamed(context, route);
   }
@@ -51,7 +50,6 @@ class ProfileView extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // User Info Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -95,7 +93,6 @@ class ProfileView extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // Menu Items with Divider
               Expanded(
                 child: ListView(
                   children: [

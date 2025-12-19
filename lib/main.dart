@@ -17,7 +17,6 @@ import 'features/profile/views/terms_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  print('Firebase initialized');
 
   runApp(const MyApp());
 }

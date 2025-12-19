@@ -34,7 +34,6 @@ class AuthProvider with ChangeNotifier {
     });
   }
 
-  // 💡 NEW: Helper to run auth logic and handle loading/error states consistently
   Future<bool> _runAuthAction(Future<User?> Function() action) async {
     _setLoading(true);
     try {
@@ -51,28 +50,22 @@ class AuthProvider with ChangeNotifier {
     return false;
   }
 
-  // ---------------- REGISTER ----------------
   Future<bool> register(String fullName, String email, String password) async {
-    // 💡 Refactored to use the helper method
     return _runAuthAction(
       () => _authController.register(fullName, email, password),
     );
   }
 
-  // ---------------- LOGIN ----------------
   Future<bool> login(String email, String password) async {
-    // 💡 Refactored to use the helper method
     return _runAuthAction(() => _authController.login(email, password));
   }
 
-  // ---------------- GOOGLE SIGN-IN ----------------
   Future<bool> signInWithGoogle() async {
     _setLoading(true);
     try {
       final firebaseUser = await _authController.signInWithGoogle();
 
       if (firebaseUser != null) {
-        // Temporary user
         final tempMap = {
           'full_name': firebaseUser.displayName ?? '',
           'email': firebaseUser.email ?? '',
@@ -80,7 +73,6 @@ class AuthProvider with ChangeNotifier {
 
         _user = UserModel.fromMap(tempMap, firebaseUser.uid);
 
-        // Update with Firestore data
         final fetched = await _authController.getUserModel(firebaseUser.uid);
         if (fetched != null) _user = fetched;
 
@@ -100,7 +92,6 @@ class AuthProvider with ChangeNotifier {
     return false;
   }
 
-  // ---------------- UPDATE FULL NAME ONLY ----------------
   Future<void> updateUserProfile({required String fullName}) async {
     if (_user == null) throw Exception('No user logged in');
 
@@ -109,13 +100,11 @@ class AuthProvider with ChangeNotifier {
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
 
-      // Update Firestore
       await FirebaseFirestore.instance.collection('users').doc(uid).update({
         'full_name': fullName.trim(),
         'updated_at': FieldValue.serverTimestamp(),
       });
 
-      // Update local cached user instantly
       _user = _user!.copyWith(fullName: fullName.trim());
 
       notifyListeners();
@@ -131,7 +120,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // ---------------- LOGOUT ----------------
   Future<void> logout() async {
     await _authController.logout();
     _user = null;

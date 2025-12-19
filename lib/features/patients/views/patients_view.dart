@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logic_health/features/auth/widgets/custom_button_widget.dart';
+import 'package:logic_health/features/patients/views/prediction_result_modal.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart'; // Ensure this is in pubspec.yaml
 
-import '../controllers/patients_controller.dart';
+import '../controllers/prediction_controller.dart';
 import '../models/patients_model.dart';
 import '../widgets/custom_input_field.dart';
 
@@ -16,10 +18,7 @@ class PatientsView extends StatefulWidget {
 }
 
 class _PatientsViewState extends State<PatientsView> {
-  // Form Key for validation
   final _formKey = GlobalKey<FormState>();
-
-  // Instantiate the Controller
   final PredictionController _predictionController = PredictionController();
 
   // Controllers
@@ -37,15 +36,22 @@ class _PatientsViewState extends State<PatientsView> {
   String? selectedFastingBS;
   String? selectedRestingECG;
 
-  // Loading state
   bool _isLoading = false;
 
-  // Integrated Prediction Logic
+  @override
+  void dispose() {
+    // Always dispose controllers to save memory
+    ageController.dispose();
+    oldpeakController.dispose();
+    restBPController.dispose();
+    cholesterolController.dispose();
+    maxHRController.dispose();
+    super.dispose();
+  }
+
   Future<void> _handlePrediction() async {
-    // 1. Validate TextFields using the FormState
     bool isFormValid = _formKey.currentState?.validate() ?? false;
 
-    // 2. Manually check if dropdowns are selected
     bool isDropdownsValid =
         selectedSex != null &&
         selectedChestPainType != null &&
@@ -67,7 +73,6 @@ class _PatientsViewState extends State<PatientsView> {
     setState(() => _isLoading = true);
 
     try {
-      // 3. Create the Model (This triggers the Mappers we built earlier)
       final patientData = HeartPredictionModel.fromForm(
         age: ageController.text,
         sex: selectedSex!,
@@ -82,33 +87,18 @@ class _PatientsViewState extends State<PatientsView> {
         stSlope: selectedSTSlope!,
       );
 
-      // 4. Call the API via Controller
       final result = await _predictionController.getPrediction(patientData);
 
       if (result != null) {
-        // 5. Save to Cloud Storage (Firestore)
+        // Save to Firestore
         await _predictionController.saveToFirestore(result, patientData);
 
-        // 6. Show Success Dialog
         if (!mounted) return;
-        showDialog(
+
+        showMaterialModalBottomSheet(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text(
-              'Prediction Result',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-            ),
-            content: Text(
-              'The analysis is complete. Result: ${result['prediction'] ?? 'Processed'}',
-              style: GoogleFonts.poppins(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-            ],
-          ),
+          backgroundColor: Colors.transparent,
+          builder: (context) => PredictionResultModal(result: result),
         );
       } else {
         throw Exception("Failed to get response from the server.");
@@ -182,7 +172,6 @@ class _PatientsViewState extends State<PatientsView> {
                       ),
                       const Divider(color: Color(0xff818181), height: 1),
 
-                      // Section: Patient Information
                       _buildSectionContainer(
                         title: 'Patient Information',
                         children: [
@@ -205,7 +194,6 @@ class _PatientsViewState extends State<PatientsView> {
                         ],
                       ),
 
-                      // Section: Symptoms
                       _buildSectionContainer(
                         title: 'Symptoms & Conditions',
                         children: [
@@ -255,7 +243,6 @@ class _PatientsViewState extends State<PatientsView> {
                         ],
                       ),
 
-                      // Section: Vitals
                       _buildSectionContainer(
                         title: 'Vital Signs & Measurements',
                         children: [
@@ -286,9 +273,8 @@ class _PatientsViewState extends State<PatientsView> {
                         ],
                       ),
 
-                      // Section: Blood
                       _buildSectionContainer(
-                        title: 'Blood-Related Tests',
+                        title: 'Blood & Heart Function',
                         children: [
                           CustomInputField(
                             label: 'FastingBS',
@@ -298,13 +284,6 @@ class _PatientsViewState extends State<PatientsView> {
                             onChanged: (val) =>
                                 setState(() => selectedFastingBS = val),
                           ),
-                        ],
-                      ),
-
-                      // Section: ECG
-                      _buildSectionContainer(
-                        title: 'ECG & Heart Function Tests',
-                        children: [
                           CustomInputField(
                             label: 'RestingECG',
                             hintText: "Select patient’s restingECG",
@@ -362,8 +341,8 @@ class _PatientsViewState extends State<PatientsView> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 5),
-            ...children,
+            const SizedBox(height: 10),
+            // ...children,
           ],
         ),
       ),

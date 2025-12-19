@@ -31,33 +31,25 @@ class TeamCarouselWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get screen dimensions once for use throughout the widget
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    // Define responsive dimensions
-    // The base size is good for a phone (e.g., width 400).
-    // Scale factor: screenWidth / base_width (e.g., 400)
     final double baseWidth = 400.0;
     final double scaleFactor = screenWidth / baseWidth;
 
-    // Define responsive padding and font sizes
-    final double horizontalPadding = screenWidth * 0.05; // 5% of screen width
-    final double titleFontSize =
-        32 * scaleFactor * 0.9; // Scale down slightly on large screens
-    final double carouselHeight = screenHeight * 0.45; // 45% of screen height
+    final double horizontalPadding = screenWidth * 0.05;
+    final double titleFontSize = 32 * scaleFactor * 0.9;
+    final double carouselHeight = screenHeight * 0.45;
     final double nameFontSize = 14 * scaleFactor;
     final double roleFontSize = 11 * scaleFactor;
     final double gradientBarHeight = 60 * scaleFactor;
 
     return Container(
-      // Keep background color
       color: const Color(0xffFFE7E7),
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- Title: Scaled Font and Padding ---
           Padding(
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
             child: Text(
@@ -73,14 +65,11 @@ class TeamCarouselWidget extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          // --- Carousel Slider: Scaled Height ---
           CarouselSlider.builder(
             itemCount: team.length,
             options: CarouselOptions(
-              // Use the calculated responsive height
               height: carouselHeight,
               autoPlay: true,
-              // Keep viewportFraction relative to the screen size (0.85 is a good relative value)
               viewportFraction: 0.85,
               enlargeCenterPage: true,
               autoPlayInterval: const Duration(seconds: 3),
@@ -96,13 +85,11 @@ class TeamCarouselWidget extends StatelessWidget {
                   children: [
                     Image.asset(member.image, fit: BoxFit.cover),
 
-                    // --- Bottom Gradient Bar: Scaled Height and Font Size ---
                     Positioned(
                       bottom: 0,
                       left: 0,
                       right: 0,
                       child: Container(
-                        // Use the calculated responsive height
                         height: gradientBarHeight,
                         padding: EdgeInsets.symmetric(
                           horizontal: horizontalPadding * 0.6,
@@ -125,7 +112,6 @@ class TeamCarouselWidget extends StatelessWidget {
                                   member.name,
                                   style: GoogleFonts.poppins(
                                     color: Colors.white,
-                                    // Use the calculated responsive font size
                                     fontSize: nameFontSize,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -134,7 +120,6 @@ class TeamCarouselWidget extends StatelessWidget {
                                   member.role,
                                   style: GoogleFonts.poppins(
                                     color: Colors.white,
-                                    // Use the calculated responsive font size
                                     fontSize: roleFontSize,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -142,11 +127,10 @@ class TeamCarouselWidget extends StatelessWidget {
                               ],
                             ),
 
-                            // --- Icon: Scaled Size ---
                             Icon(
                               Icons.open_in_new,
                               color: Colors.white,
-                              size: 20 * scaleFactor, // Scale the icon size
+                              size: 20 * scaleFactor,
                             ),
                           ],
                         ),
