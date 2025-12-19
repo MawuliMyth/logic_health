@@ -73,9 +73,16 @@ class PredictionController {
   }
 
   Stream<QuerySnapshot> getRecentPredictions() {
+    final User? user = _auth.currentUser;
+
+    if (user == null) {
+      return const Stream.empty();
+    }
+
     return _db
         .collection('predictions')
-        .orderBy('timestamp', descending: true) // Newest at the top
+        .where('userId', isEqualTo: user.uid)
+        .orderBy('timestamp', descending: true)
         .snapshots();
   }
 }

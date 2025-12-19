@@ -50,8 +50,10 @@ class _PatientsViewState extends State<PatientsView> {
   }
 
   Future<void> _handlePrediction() async {
+    // 1. Validate TextFields using the FormState
     bool isFormValid = _formKey.currentState?.validate() ?? false;
 
+    // 2. Manually check if dropdowns are selected
     bool isDropdownsValid =
         selectedSex != null &&
         selectedChestPainType != null &&
@@ -73,6 +75,7 @@ class _PatientsViewState extends State<PatientsView> {
     setState(() => _isLoading = true);
 
     try {
+      // 3. Create the Model
       final patientData = HeartPredictionModel.fromForm(
         age: ageController.text,
         sex: selectedSex!,
@@ -87,14 +90,16 @@ class _PatientsViewState extends State<PatientsView> {
         stSlope: selectedSTSlope!,
       );
 
+      // 4. Call the API via Controller
       final result = await _predictionController.getPrediction(patientData);
 
       if (result != null) {
-        // Save to Firestore
+        // 5. Save to Firestore
         await _predictionController.saveToFirestore(result, patientData);
 
         if (!mounted) return;
 
+        // 6. Show Result in Bottom Sheet
         showMaterialModalBottomSheet(
           context: context,
           backgroundColor: Colors.transparent,
@@ -105,9 +110,11 @@ class _PatientsViewState extends State<PatientsView> {
       }
     } catch (e) {
       if (!mounted) return;
+      // Stripping "Exception: " for a cleaner message
+      String errorMsg = e.toString().replaceAll("Exception: ", "");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ${e.toString()}'),
+          content: Text('Error: $errorMsg'),
           backgroundColor: Colors.red,
         ),
       );
@@ -248,11 +255,16 @@ class _PatientsViewState extends State<PatientsView> {
                         children: [
                           CustomInputField(
                             label: 'RestingBP',
-                            hintText: "Enter patient’s resting BP level",
+                            hintText: "Max 200 mmHg",
                             keyboardType: TextInputType.number,
                             controller: restBPController,
-                            validator: (v) =>
-                                (v == null || v.isEmpty) ? 'Required' : null,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              final val = int.tryParse(v);
+                              if (val == null) return 'Enter a number';
+                              if (val > 200) return 'Must be 200 or less';
+                              return null;
+                            },
                           ),
                           CustomInputField(
                             label: 'Cholesterol',
@@ -264,11 +276,16 @@ class _PatientsViewState extends State<PatientsView> {
                           ),
                           CustomInputField(
                             label: 'Thalch',
-                            hintText: "Enter max heart rate achieved",
+                            hintText: "Max 220 bpm",
                             keyboardType: TextInputType.number,
                             controller: maxHRController,
-                            validator: (v) =>
-                                (v == null || v.isEmpty) ? 'Required' : null,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              final val = int.tryParse(v);
+                              if (val == null) return 'Enter a number';
+                              if (val > 220) return 'Must be 220 or less';
+                              return null;
+                            },
                           ),
                         ],
                       ),
@@ -342,7 +359,7 @@ class _PatientsViewState extends State<PatientsView> {
               ),
             ),
             const SizedBox(height: 10),
-            ...children, // Added the missing children here
+            ...children,
           ],
         ),
       ),

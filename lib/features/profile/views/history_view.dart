@@ -21,6 +21,7 @@ class _HistoryViewState extends State<HistoryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -65,12 +66,59 @@ class _HistoryViewState extends State<HistoryView> {
               return Dismissible(
                 key: Key(doc.id),
                 direction: DismissDirection.endToStart,
+                // --- ADDED: Confirmation Dialog ---
+                confirmDismiss: (direction) async {
+                  return await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        title: Text(
+                          "Delete Record?",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: Text(
+                          "This will permanently remove this prediction from your history. Are you sure?",
+                          style: GoogleFonts.poppins(fontSize: 14),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text(
+                              "CANCEL",
+                              style: GoogleFonts.poppins(color: Colors.grey),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text(
+                              "DELETE",
+                              style: GoogleFonts.poppins(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                // --- ON DISMISSED: Only runs if confirmDismiss returns true ---
                 onDismissed: (direction) {
                   _controller.deletePrediction(doc.id);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      backgroundColor: Colors.red,
-                      content: Text('Record deleted'),
+                    SnackBar(
+                      backgroundColor: Colors.red.shade800,
+                      behavior: SnackBarBehavior.floating,
+                      content: Text(
+                        'Record deleted successfully',
+                        style: GoogleFonts.poppins(),
+                      ),
                     ),
                   );
                 },
@@ -89,7 +137,7 @@ class _HistoryViewState extends State<HistoryView> {
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.grey.shade300),
+                    side: BorderSide(color: Colors.grey.shade200),
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(
@@ -140,7 +188,7 @@ class _HistoryViewState extends State<HistoryView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history_rounded, size: 80, color: Colors.grey.shade300),
+          Icon(Icons.history_rounded, size: 80, color: Colors.grey.shade200),
           const SizedBox(height: 16),
           Text(
             'No history found yet',
