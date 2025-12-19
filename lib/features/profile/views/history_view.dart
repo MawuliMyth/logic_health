@@ -18,6 +18,54 @@ class HistoryView extends StatefulWidget {
 class _HistoryViewState extends State<HistoryView> {
   final PredictionController _controller = PredictionController();
 
+  // Helper for "Clear All" logic
+  Future<void> _showClearAllDialog() async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Clear All History?',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Are you sure you want to delete all records? This cannot be undone.',
+          style: GoogleFonts.poppins(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Clear All',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _controller.clearAllHistory();
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('History cleared')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,11 +73,21 @@ class _HistoryViewState extends State<HistoryView> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
         title: Text(
           'Prediction History',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 18),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: Colors.black,
+          ),
         ),
-        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_sweep_outlined, color: Colors.red),
+            onPressed: _showClearAllDialog,
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _controller.getRecentPredictions(),
@@ -50,9 +108,9 @@ class _HistoryViewState extends State<HistoryView> {
             itemBuilder: (context, index) {
               final doc = snapshot.data!.docs[index];
               final data = doc.data() as Map<String, dynamic>;
-
               final result = data['prediction_result'] as Map<String, dynamic>;
               final timestamp = data['timestamp'] as Timestamp?;
+
               final dateStr = timestamp != null
                   ? DateFormat(
                       'MMM dd, yyyy - hh:mm a',
@@ -66,62 +124,38 @@ class _HistoryViewState extends State<HistoryView> {
               return Dismissible(
                 key: Key(doc.id),
                 direction: DismissDirection.endToStart,
-                // --- ADDED: Confirmation Dialog ---
                 confirmDismiss: (direction) async {
                   return await showDialog(
                     context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        title: Text(
-                          "Delete Record?",
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        content: Text(
-                          "This will permanently remove this prediction from your history. Are you sure?",
-                          style: GoogleFonts.poppins(fontSize: 14),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: Text(
-                              "CANCEL",
-                              style: GoogleFonts.poppins(color: Colors.grey),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: Text(
-                              "DELETE",
-                              style: GoogleFonts.poppins(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                // --- ON DISMISSED: Only runs if confirmDismiss returns true ---
-                onDismissed: (direction) {
-                  _controller.deletePrediction(doc.id);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Colors.red.shade800,
-                      behavior: SnackBarBehavior.floating,
+                    builder: (context) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      title: Text(
+                        "Delete Record?",
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                      ),
                       content: Text(
-                        'Record deleted successfully',
+                        "Remove this prediction from your history?",
                         style: GoogleFonts.poppins(),
                       ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text("Cancel"),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text(
+                            "Delete",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },
+                onDismissed: (_) => _controller.deletePrediction(doc.id),
                 background: Container(
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
@@ -140,10 +174,6 @@ class _HistoryViewState extends State<HistoryView> {
                     side: BorderSide(color: Colors.grey.shade200),
                   ),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
                     leading: CircleAvatar(
                       backgroundColor: isHighRisk
                           ? Colors.red.shade50
@@ -154,7 +184,7 @@ class _HistoryViewState extends State<HistoryView> {
                       ),
                     ),
                     title: Text(
-                      result['risk_level'],
+                      result['risk_level'] ?? 'Unknown',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
                         color: isHighRisk ? Colors.red : Colors.green,

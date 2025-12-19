@@ -227,13 +227,19 @@ class _PatientsViewState extends State<PatientsView> {
                           ),
                           CustomInputField(
                             label: 'OldPeak',
-                            hintText: "Enter ST Depression",
+                            hintText: "Enter ST Depression (0 - 7)",
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
                             controller: oldpeakController,
-                            validator: (v) =>
-                                (v == null || v.isEmpty) ? 'Required' : null,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              final val = double.tryParse(v);
+                              if (val == null) return 'Enter a valid number';
+                              if (val < 0 || val > 7)
+                                return 'Value must be between 0 and 7';
+                              return null;
+                            },
                           ),
                           CustomInputField(
                             label: 'ST_Slope',

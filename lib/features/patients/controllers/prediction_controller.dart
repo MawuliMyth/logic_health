@@ -7,8 +7,6 @@ import 'package:http/http.dart' as http;
 
 import '../models/patients_model.dart';
 
-const String appId = 'heart-disease-predictor';
-
 class PredictionController {
   final String apiUrl = "http://184.72.114.0:8000/predict";
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -56,7 +54,6 @@ class PredictionController {
       };
 
       await _db.collection('predictions').add(dataToSave);
-      debugPrint("Data saved successfully.");
     } catch (e) {
       debugPrint("Error saving to Firestore: $e");
     }
@@ -65,19 +62,38 @@ class PredictionController {
   Future<void> deletePrediction(String docId) async {
     try {
       await _db.collection('predictions').doc(docId).delete();
-      debugPrint("Document $docId deleted successfully.");
     } catch (e) {
       debugPrint("Error deleting document: $e");
       rethrow;
     }
   }
 
+  // --- NEW: Clear All History Logic ---
+  Future<void> clearAllHistory() async {
+    try {
+      final String? uid = _auth.currentUser?.uid;
+      if (uid == null) return;
+
+      final snapshots = await _db
+          .collection('predictions')
+          .where('userId', isEqualTo: uid)
+          .get();
+
+      final batch = _db.batch();
+      for (var doc in snapshots.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+    } catch (e) {
+      debugPrint("Clear History Error: $e");
+      rethrow;
+    }
+  }
+
   Stream<QuerySnapshot> getRecentPredictions() {
     final User? user = _auth.currentUser;
-
-    if (user == null) {
-      return const Stream.empty();
-    }
+    if (user == null) return const Stream.empty();
 
     return _db
         .collection('predictions')
