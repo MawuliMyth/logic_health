@@ -342,7 +342,7 @@ class _PatientsViewState extends State<PatientsView> {
               ),
             ),
             const SizedBox(height: 10),
-            // ...children,
+            ...children, // Added the missing children here
           ],
         ),
       ),
