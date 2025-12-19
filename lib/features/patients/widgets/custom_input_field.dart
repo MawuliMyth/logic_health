@@ -10,6 +10,7 @@ class CustomInputField extends StatefulWidget {
   final String? value;
   final Function(String?)? onChanged;
   final TextInputType keyboardType;
+  final String? Function(String?)? validator; // Added validator
 
   const CustomInputField({
     super.key,
@@ -20,6 +21,7 @@ class CustomInputField extends StatefulWidget {
     this.value,
     this.onChanged,
     this.keyboardType = TextInputType.text,
+    this.validator, // Added to constructor
   });
 
   @override
@@ -28,8 +30,7 @@ class CustomInputField extends StatefulWidget {
 
 class _CustomInputFieldState extends State<CustomInputField> {
   OverlayEntry? _overlayEntry;
-  final GlobalKey _fieldKey =
-      GlobalKey(); // Key to find the position of the box
+  final GlobalKey _fieldKey = GlobalKey();
 
   @override
   void dispose() {
@@ -59,16 +60,16 @@ class _CustomInputFieldState extends State<CustomInputField> {
           children: [
             Positioned(
               left: position.dx,
-              top: position.dy + size.height + 4, // 4px gap below the field
+              top: position.dy + size.height + 4,
               width: size.width,
               child: Material(
-                elevation: 1,
+                elevation: 4,
                 borderRadius: BorderRadius.circular(10),
                 color: Colors.white,
                 child: Container(
                   constraints: const BoxConstraints(maxHeight: 250),
                   decoration: BoxDecoration(
-                    color: Color(0xffFFF5F5),
+                    color: const Color(0xffFFF5F5),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: const Color(0xffE6E6E6)),
                   ),
@@ -98,7 +99,6 @@ class _CustomInputFieldState extends State<CustomInputField> {
         ),
       ),
     );
-
     Overlay.of(context).insert(_overlayEntry!);
   }
 
@@ -122,20 +122,23 @@ class _CustomInputFieldState extends State<CustomInputField> {
     );
   }
 
-  // --- STANDARD TEXTFIELD ---
   Widget _buildTextField() {
     return TextFormField(
       controller: widget.controller,
       keyboardType: widget.keyboardType,
+      validator: widget.validator, // Pass validator here
+      autovalidateMode:
+          AutovalidateMode.onUserInteraction, // Shows error as user types
       style: GoogleFonts.poppins(fontSize: 13),
       decoration: _inputDecoration(),
     );
   }
 
-  // --- DROPDOWN TRIGGER ---
   Widget _buildDropdownTrigger() {
+    // Check if validation error is needed for dropdown
+
     return GestureDetector(
-      key: _fieldKey, // Assign the key here
+      key: _fieldKey,
       onTap: _showDropdown,
       child: Container(
         decoration: BoxDecoration(
@@ -146,13 +149,16 @@ class _CustomInputFieldState extends State<CustomInputField> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              widget.value ?? widget.hintText,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                color: widget.value == null
-                    ? const Color(0xff818181)
-                    : Colors.black,
+            Expanded(
+              child: Text(
+                widget.value ?? widget.hintText,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: widget.value == null
+                      ? const Color(0xff818181)
+                      : Colors.black,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const Icon(
@@ -173,7 +179,10 @@ class _CustomInputFieldState extends State<CustomInputField> {
         fontSize: 12,
         color: const Color(0xff818181),
       ),
-
+      errorStyle: const TextStyle(
+        fontSize: 10,
+        height: 0.8,
+      ), // Styling the error text
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
@@ -182,6 +191,10 @@ class _CustomInputFieldState extends State<CustomInputField> {
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: Color(0xffE6E6E6)),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.red),
       ),
     );
   }
