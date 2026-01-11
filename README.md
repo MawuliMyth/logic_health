@@ -1,16 +1,32 @@
-# logic_health
+Logic Health 🩺
+Logic Health is a Flutter-based healthcare application designed to provide users with instant heart health risk assessments. By leveraging machine learning and real-time data synchronization, users can input biological data, receive risk predictions, and manage their health history securely.
 
-A new Flutter project.
+🚀 Features
+Heart Risk Prediction: Connects to a specialized FastAPI/ML backend to predict risk levels based on user-provided biological parameters.
 
-## Getting Started
+User History: A personalized history view that displays previous prediction results.
 
-This project is a starting point for a Flutter application.
+Secure Data Management: Integrated with Firebase Auth and Firestore to ensure users only see their own data.
 
-A few resources to get you started if this is your first Flutter project:
+Interactive UI: Modern design using Google Fonts (Poppins), custom modals, and swipe-to-delete functionality.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+🛠 Tech Stack
+Frontend: Flutter (Dart)
+
+Backend Database: Google Firebase Firestore
+
+Authentication: Firebase Auth
+
+Machine Learning API: FastAPI (Deployed on AWS/EC2)
+
+State Management: Controller-based logic separation
+
+📂 Project Structure
+lib/
+├── patients/
+│   ├── controllers/      # Business logic (PredictionController.dart)
+│   ├── models/           # Data models (UserModel.dart, HeartPredictionModel.dart)
+│   └── views/            # UI screens (HistoryView.dart, PredictionResultModal.dart)
+├── main.dart             # App entry point
+└── firebase_options.dart # Firebase configuration
