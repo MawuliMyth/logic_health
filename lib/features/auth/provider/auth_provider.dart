@@ -139,10 +139,12 @@ class AuthProvider with ChangeNotifier {
 
   String _handleFirebaseError(String code) {
     switch (code) {
-      case 'weak-password':
-        return 'Password is too weak.';
+      case 'invalid-credential':
+        return 'Invalid email or password. Please try again.';
       case 'email-already-in-use':
         return 'Account already exists with this email.';
+      case 'weak-password':
+        return 'Password is too weak.';
       case 'invalid-email':
         return 'Invalid email format.';
       case 'user-disabled':

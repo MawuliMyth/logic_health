@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import '../models/patients_model.dart';
 
 class PredictionController {
-  final String apiUrl = "http:///predict";
+  final String apiUrl = "http://54.89.4.244:8000/predict";
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 

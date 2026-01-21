@@ -18,12 +18,9 @@ class AuthController {
     _initializeGoogleSignIn();
   }
 
-  // Initialize GoogleSignIn asynchronously with your Web Client ID
   Future<void> _initializeGoogleSignIn() async {
     if (_isInitialized) return;
-
     _googleSignIn = GoogleSignIn.instance;
-
     try {
       await _googleSignIn.initialize(
         serverClientId:
@@ -38,9 +35,19 @@ class AuthController {
 
   User? get currentUser => _auth.currentUser;
 
-  // Email/Password Registration
+  // Updated Registration with Name Validation
   Future<User?> register(String fullName, String email, String password) async {
     try {
+      final String trimmedName = fullName.trim();
+
+      // 🛑 LOGIC GUARD: Enforce standard naming
+      if (trimmedName.length < 4 || !trimmedName.contains(' ')) {
+        throw FirebaseAuthException(
+          code: 'invalid-name',
+          message: 'A valid full name (First and Last) is required.',
+        );
+      }
+
       final UserCredential cred = await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password,
@@ -49,7 +56,7 @@ class AuthController {
       final User? user = cred.user;
       if (user != null) {
         await _firestore.collection('users').doc(user.uid).set({
-          'full_name': fullName.trim(),
+          'full_name': trimmedName,
           'email': email.trim(),
           'photo_url': null,
           'created_at': FieldValue.serverTimestamp(),
@@ -66,7 +73,6 @@ class AuthController {
     }
   }
 
-  // Email/Password Login
   Future<User?> login(String email, String password) async {
     try {
       final UserCredential cred = await _auth.signInWithEmailAndPassword(
@@ -85,41 +91,34 @@ class AuthController {
 
   Future<User?> signInWithGoogle() async {
     try {
-      // Ensure initialization
-      if (!_isInitialized) {
-        await _initializeGoogleSignIn();
-      }
+      if (!_isInitialized) await _initializeGoogleSignIn();
 
       GoogleSignInAccount? googleUser;
-
       final lightweightResult = await _googleSignIn
           .attemptLightweightAuthentication();
+
       if (lightweightResult != null) {
         googleUser = lightweightResult;
       } else {
         if (!_googleSignIn.supportsAuthenticate()) {
-          throw Exception(
-            'Platform does not support Google Sign-In authentication',
-          );
+          throw Exception('Platform does not support Google Sign-In');
         }
-        final authResult = await _googleSignIn.authenticate(scopeHint: _scopes);
-        googleUser = authResult;
+        googleUser = await _googleSignIn.authenticate(scopeHint: _scopes);
       }
 
-      final GoogleSignInAuthentication auth = googleUser.authentication;
-      if (auth.idToken == null) {
-        throw Exception('No ID token received from Google');
-      }
+      if (googleUser == null) return null;
+
+      final GoogleSignInAuthentication auth = await googleUser.authentication;
+      if (auth.idToken == null) throw Exception('No ID token received');
 
       final credential = GoogleAuthProvider.credential(idToken: auth.idToken);
-
       final UserCredential userCred = await _auth.signInWithCredential(
         credential,
       );
       final User? user = userCred.user;
+
       if (user == null) return null;
 
-      // Create or update Firestore user document
       final docRef = _firestore.collection('users').doc(user.uid);
       final doc = await docRef.get();
 
@@ -139,9 +138,6 @@ class AuthController {
       }
 
       return user;
-    } on FirebaseAuthException catch (e) {
-      debugPrint('Google Sign-In Firebase error: ${e.code} - ${e.message}');
-      rethrow;
     } catch (e) {
       debugPrint('Google Sign-In error: $e');
       rethrow;
@@ -151,18 +147,13 @@ class AuthController {
   Future<void> logout() async {
     try {
       await _auth.signOut();
-
-      if (_isInitialized) {
-        await _googleSignIn.signOut();
-      }
-
+      if (_isInitialized) await _googleSignIn.signOut();
       debugPrint('User logged out successfully');
     } catch (e) {
       debugPrint('Logout error: $e');
     }
   }
 
-  // Fetch UserModel from Firestore
   Future<UserModel?> getUserModel(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();

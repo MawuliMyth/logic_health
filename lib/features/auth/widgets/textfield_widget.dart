@@ -7,6 +7,8 @@ class TextfieldWidget extends StatefulWidget {
   final TextEditingController controller;
   final bool enabled;
   final String? Function(String?)? validator;
+  // 💡 Added capitalization support
+  final TextCapitalization textCapitalization;
 
   const TextfieldWidget({
     super.key,
@@ -16,6 +18,7 @@ class TextfieldWidget extends StatefulWidget {
     required this.controller,
     required this.enabled,
     this.validator,
+    this.textCapitalization = TextCapitalization.none, // Default to none
   });
 
   @override
@@ -39,11 +42,15 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
       validator: widget.validator,
+      // 💡 Apply the capitalization here
+      textCapitalization: widget.textCapitalization,
 
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
 
+        // Error Styling
+        errorStyle: const TextStyle(color: Colors.red, fontSize: 12),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.red, width: 1.5),
@@ -53,6 +60,7 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
           borderSide: const BorderSide(color: Colors.red, width: 1.5),
         ),
 
+        // Default Styling
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -64,6 +72,8 @@ class _TextfieldWidgetState extends State<TextfieldWidget> {
         ),
         fillColor: Colors.white,
         filled: true,
+
+        // Password visibility toggle
         suffixIcon: widget.obscureText
             ? IconButton(
                 icon: Icon(

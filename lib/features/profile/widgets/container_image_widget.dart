@@ -24,13 +24,7 @@ class ContainerImageWidget extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(
-                    0xff666666,
-                  ), // Use Colors.transparent for better clarity
-                  const Color(0xff000000),
-                  const Color(0xff000000),
-                ],
+                colors: [Colors.transparent, const Color(0xff000000)],
               ),
             ),
           ),

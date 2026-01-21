@@ -25,7 +25,7 @@ class TeamCarouselWidget extends StatelessWidget {
     TeamMember(
       image: "assets/images/M.png",
       name: "Joseph Micheal ",
-      role: "PowerPoint Developer",
+      role: "Documentation",
     ),
   ];
 

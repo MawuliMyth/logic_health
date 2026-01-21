@@ -21,7 +21,6 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   bool isSignInActive = true;
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late final TextEditingController nameController;
@@ -65,10 +64,23 @@ class _LoginViewState extends State<LoginView> {
         return Scaffold(
           backgroundColor: const Color(0xffFF0000),
           resizeToAvoidBottomInset: true,
-          extendBody: true,
           body: Stack(
             children: [
-              // Main Container
+              // Branding/Logo Area (Top)
+              Positioned(
+                top: 100,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: SizedBox(
+                    height: 200,
+                    width: 200,
+                    child: Image.asset('assets/images/logoii.png'),
+                  ),
+                ),
+              ),
+
+              // Auth Content Container (Bottom)
               Positioned(
                 top: 322,
                 left: 0,
@@ -86,144 +98,18 @@ class _LoginViewState extends State<LoginView> {
                     padding: const EdgeInsets.fromLTRB(20, 30, 20, 40),
                     child: Column(
                       children: [
-                        // Header
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: Text(
-                            isSignInActive
-                                ? 'Welcome back'
-                                : 'Create your account',
-                            key: ValueKey(isSignInActive),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Register or sign in to get started',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Color(0xff818181),
-                          ),
-                        ),
+                        _buildHeader(),
                         const SizedBox(height: 24),
-
-                        // Register / Sign In Toggle
-                        Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: const Color(0xffF6F6F6)),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() {
-                                    isSignInActive = false;
-                                    authProvider.clearError();
-                                    _formKey.currentState?.reset();
-                                  }),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: isSignInActive
-                                          ? Colors.white
-                                          : const Color(0xffFFF5F5),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      'Register',
-                                      style: TextStyle(
-                                        color: isSignInActive
-                                            ? Colors.black87
-                                            : const Color(0xffFF0000),
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() {
-                                    isSignInActive = true;
-                                    authProvider
-                                        .clearError(); // Clear error on switch
-                                    _formKey.currentState
-                                        ?.reset(); // Clear validation errors
-                                  }),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: isSignInActive
-                                          ? const Color(0xffF9E1E1)
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      'Sign In',
-                                      style: TextStyle(
-                                        color: isSignInActive
-                                            ? const Color(0xffFF0000)
-                                            : Colors.black87,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        _buildAuthToggle(authProvider),
                         const SizedBox(height: 30),
 
-                        // Error message
                         if (authProvider.errorMessage != null)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(12),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              border: Border.all(color: Colors.red.shade200),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              authProvider.errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                          _buildErrorContainer(authProvider.errorMessage!),
 
                         Form(
                           key: _formKey,
                           child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 400),
-                            switchInCurve: Curves.easeOutCubic,
-                            switchOutCurve: Curves.easeInCubic,
-                            transitionBuilder: (child, animation) {
-                              final offset = !isSignInActive
-                                  ? const Offset(1.0, 0)
-                                  : const Offset(-1.0, 0);
-                              return SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: offset,
-                                  end: Offset.zero,
-                                ).animate(animation),
-                                child: FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                ),
-                              );
-                            },
+                            duration: const Duration(milliseconds: 300),
                             child: isSignInActive
                                 ? _buildSignInForm(authProvider)
                                 : _buildRegisterForm(authProvider),
@@ -234,7 +120,6 @@ class _LoginViewState extends State<LoginView> {
                         const DividerWidget(),
                         const SizedBox(height: 20),
 
-                        // Google Sign-In Button
                         GoogleButtonWidget(
                           text: authProvider.isLoading
                               ? "Signing in..."
@@ -262,7 +147,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
 
-              // Full-screen loading overlay
+              // Loading Overlay
               if (authProvider.isLoading)
                 Container(
                   color: Colors.black54,
@@ -277,47 +162,124 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        Text(
+          isSignInActive ? 'Welcome back' : 'Create your account',
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Register or sign in to get started',
+          style: TextStyle(fontSize: 15, color: Color(0xff818181)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAuthToggle(AuthProvider authProvider) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: const Color(0xffF6F6F6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _toggleButton('Register', !isSignInActive, () {
+            setState(() {
+              isSignInActive = false;
+              authProvider.clearError();
+              _formKey.currentState?.reset();
+            });
+          }),
+          _toggleButton('Sign In', isSignInActive, () {
+            setState(() {
+              isSignInActive = true;
+              authProvider.clearError();
+              _formKey.currentState?.reset();
+            });
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _toggleButton(String text, bool active, VoidCallback onTap) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: active ? const Color(0xffFF0000) : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            text,
+            style: TextStyle(
+              color: active ? Colors.white : Colors.black54,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorContainer(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Text(
+        message,
+        style: const TextStyle(color: Colors.red, fontSize: 13),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   Widget _buildSignInForm(AuthProvider auth) {
     return Column(
       key: const ValueKey('signin'),
       children: [
         TextfieldWidget(
-          enabled: true,
+          enabled: !auth.isLoading,
           hintText: 'Email',
-          obscureText: false,
           keyboardType: TextInputType.emailAddress,
+          obscureText: false,
           controller: emailController,
           validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Email is required.';
-            }
-            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-              return 'Enter a valid email address.';
-            }
+            if (value == null || value.isEmpty) return 'Email is required.';
+            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
+              return 'Invalid email address.';
             return null;
           },
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
-          enabled: true,
+          enabled: !auth.isLoading,
           hintText: 'Password',
-          obscureText: true,
           keyboardType: TextInputType.visiblePassword,
+          obscureText: true,
           controller: passwordController,
-          // 💡 NEW: Password validation
           validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Password is required.';
-            }
-            if (value.length < 6) {
-              return 'Password must be at least 6 characters.';
-            }
+            if (value == null || value.isEmpty) return 'Password is required.';
             return null;
           },
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 30),
         CustomButtonWidget(
-          text: auth.isLoading ? 'Signing In...' : 'Sign In',
+          text: 'Sign In',
           onPressed: auth.isLoading
               ? null
               : () {
@@ -345,55 +307,53 @@ class _LoginViewState extends State<LoginView> {
       key: const ValueKey('register'),
       children: [
         TextfieldWidget(
-          enabled: true,
+          enabled: !auth.isLoading,
           hintText: 'Full Name',
-          obscureText: false,
           keyboardType: TextInputType.name,
+          obscureText: false,
           controller: nameController,
+          textCapitalization:
+              TextCapitalization.words, // Capitalizes "John Doe"
           validator: (value) {
-            if (value == null || value.isEmpty || value.trim().length < 2) {
-              return 'Full name is required.';
-            }
+            final name = value?.trim() ?? '';
+            if (name.isEmpty) return 'Full name is required.';
+            if (name.length < 4) return 'Name must be at least 4 characters.';
+            if (!name.contains(' '))
+              return 'Please enter both first and last name.';
             return null;
           },
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
-          enabled: true,
+          enabled: !auth.isLoading,
           hintText: 'Email',
-          obscureText: false,
           keyboardType: TextInputType.emailAddress,
+          obscureText: false,
           controller: emailController,
           validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Email is required.';
-            }
-            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-              return 'Enter a valid email address.';
-            }
+            if (value == null || value.isEmpty) return 'Email is required.';
+            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
+              return 'Invalid email address.';
             return null;
           },
         ),
         const SizedBox(height: 16),
         TextfieldWidget(
-          enabled: true,
+          enabled: !auth.isLoading,
           hintText: 'Password',
-          obscureText: true,
           keyboardType: TextInputType.visiblePassword,
+          obscureText: true,
           controller: passwordController,
           validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Password is required.';
-            }
-            if (value.length < 6) {
+            if (value == null || value.isEmpty) return 'Password is required.';
+            if (value.length < 6)
               return 'Password must be at least 6 characters.';
-            }
             return null;
           },
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 30),
         CustomButtonWidget(
-          text: auth.isLoading ? 'Creating Account...' : 'Register',
+          text: 'Register',
           onPressed: auth.isLoading
               ? null
               : () {
