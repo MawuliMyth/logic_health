@@ -274,11 +274,18 @@ class _PatientsViewState extends State<PatientsView> {
                           ),
                           CustomInputField(
                             label: 'Cholesterol',
-                            hintText: "Enter cholesterol",
+                            hintText:
+                                "Enter cholesterol (> 100 mg/dl)", // Updated hint to inform user
                             keyboardType: TextInputType.number,
                             controller: cholesterolController,
-                            validator: (v) =>
-                                (v == null || v.isEmpty) ? 'Required' : null,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              final val = int.tryParse(v);
+                              if (val == null) return 'Enter a valid number';
+                              if (val <= 100)
+                                return 'Cholesterol must be greater than 100'; // Validation logic
+                              return null;
+                            },
                           ),
                           CustomInputField(
                             label: 'Thalch',

@@ -17,12 +17,17 @@ import 'features/profile/views/terms_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  print("Firebase connected: ${Firebase.apps.length}");
 
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  static const bool _portfolioDemo = bool.fromEnvironment(
+    'PORTFOLIO_DEMO',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,9 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         home: Consumer<AuthProvider>(
           builder: (context, auth, child) {
+            if (_portfolioDemo) {
+              return const HomeBotView();
+            }
             if (auth.isAuthenticated) {
               return const HomeBotView();
             } else {
